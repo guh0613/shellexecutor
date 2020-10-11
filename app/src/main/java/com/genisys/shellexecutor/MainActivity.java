@@ -11,6 +11,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +33,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        final CheckBox ifroot = findViewById(R.id.asroot);
+        final EditText commandline = findViewById(R.id.input);
+        final TextView output = findViewById(R.id.outputtext);
+        FloatingActionButton fab = findViewById(R.id.fab);
 
         //总之先看看有没有读写权限
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED | ContextCompat.checkSelfPermission(MainActivity.this,Manifest.permission.READ_EXTERNAL_STORAGE)!=PackageManager.PERMISSION_GRANTED)
@@ -56,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
                 {
                     Toast.makeText(MainActivity.this,"(눈_눈)",Toast.LENGTH_SHORT).show();
 
+
                 }
 
 
@@ -63,16 +69,23 @@ public class MainActivity extends AppCompatActivity {
             dialog.show();
         }
 
-        final CheckBox ifroot = findViewById(R.id.asroot);
-        final EditText commandline = findViewById(R.id.input);
-        Boolean isroot = ShellUtils.checkRootPermission();
-        FloatingActionButton fab = findViewById(R.id.fab);
-
         //想以root身份运行？
         ifroot.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
+                if (ShellUtils.checkRootPermission() == false && isChecked == true) {
+                    android.app.AlertDialog.Builder seemnoroot =new android.app.AlertDialog.Builder(MainActivity.this);
+                    seemnoroot.setTitle("关于root权限");
+                    seemnoroot.setMessage("您似乎并未授予我们root权限，或者请检查贵机是非已root。");
+                    seemnoroot.setPositiveButton("已阅", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            ShellUtils.checkRootPermission();
+                        }
+                    });
+                    seemnoroot.show();
+                    ifroot.setChecked(false);
+            }
             }
         });
 
@@ -89,6 +102,9 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     Snackbar.make(view, "哦哦......！全身都燃烧起来了！开始执行！", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
+                    Boolean shouldasroot = ShellUtils.checkRootPermission() && ifroot.isChecked();
+                    ShellUtils.CommandResult result= ShellUtils.execCommand(input,shouldasroot);
+                    output.setText(result.successMsg+result.errorMsg);
 
                 }
             }

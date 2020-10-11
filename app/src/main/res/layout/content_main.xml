@@ -44,6 +44,7 @@
                 android:layout_height="wrap_content">
 
                 <EditText
+                    android:id="@+id/input"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:autofillHints=""
@@ -74,11 +75,13 @@
                 android:text="运行选项" />
 
             <CheckBox
+                android:id="@+id/asroot"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="使用root权限执行此命令" />
 
             <CheckBox
+                android:id="@+id/isresult"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="仅执行命令，不输出结果(运行更快)" />
